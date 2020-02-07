@@ -13,7 +13,7 @@ apply plugin: 'application'
 
 group 'com.alexsullivan'
 version '0.0.1'
-mainClassName = 'com.alexsullivan.Application.kt'
+mainClassName = 'com.alexsullivan.ApplicationKt'
 task stage {
     dependsOn installDist
 }
