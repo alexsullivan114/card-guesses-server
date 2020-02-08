@@ -10,7 +10,7 @@ class GameStatusSerializer : JsonSerializer<GameStatus>() {
     override fun serialize(value: GameStatus, gen: JsonGenerator, serializers: SerializerProvider?) {
         val serializedString = when (value) {
             GameStatus.Playing -> "Playing"
-            is GameStatus.GameOver -> if (value.winner == Team.RED) "Red" else "Blue"
+            is GameStatus.GameOver -> if (value.winner == Team.Red) "RedWon" else "BlueWon"
         }
 
         gen.writeString(serializedString)

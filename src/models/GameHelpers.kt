@@ -9,7 +9,7 @@ fun newGame(gameCode: GameCode): Game {
 
 fun processGuess(oldGameState: Game, guess: Guess): Game {
     val word = oldGameState.words.first { it.text == guess.text }
-    val updatedWord = word.copy(guessStatus = GuessStatus.GUESSED)
+    val updatedWord = word.copy(guessStatus = GuessStatus.Guessed)
     val newWords = oldGameState.words.replace(word, updatedWord)
     return when (word.owner) {
         CardOwner.AssassinOwned -> Game(
@@ -26,43 +26,43 @@ fun processGuess(oldGameState: Game, guess: Guess): Game {
 
 fun updatedStatus(words: List<Word>): GameStatus {
     val redWon =
-        words.all { it.owner is CardOwner.TeamOwned && it.owner.team == Team.RED && it.guessStatus == GuessStatus.GUESSED }
+        words.all { it.owner is CardOwner.TeamOwned && it.owner.team == Team.Red && it.guessStatus == GuessStatus.Guessed }
     val blueWon =
-        words.all { it.owner is CardOwner.TeamOwned && it.owner.team == Team.BLUE && it.guessStatus == GuessStatus.GUESSED }
+        words.all { it.owner is CardOwner.TeamOwned && it.owner.team == Team.Blue && it.guessStatus == GuessStatus.Guessed }
 
     return when {
-        redWon -> GameStatus.GameOver(winner = Team.RED)
-        blueWon -> GameStatus.GameOver(winner = Team.BLUE)
+        redWon -> GameStatus.GameOver(winner = Team.Red)
+        blueWon -> GameStatus.GameOver(winner = Team.Blue)
         else -> GameStatus.Playing
     }
 }
 
 fun randomWords(): List<Word> {
     return listOf(
-        Word("Grapefruit", CardOwner.TeamOwned(Team.BLUE), GuessStatus.NOT_GUESSED),
-        Word("Banana", CardOwner.TeamOwned(Team.BLUE), GuessStatus.NOT_GUESSED),
-        Word("Apple", CardOwner.TeamOwned(Team.BLUE), GuessStatus.NOT_GUESSED),
-        Word("Wagon", CardOwner.TeamOwned(Team.BLUE), GuessStatus.NOT_GUESSED),
-        Word("Wood", CardOwner.TeamOwned(Team.BLUE), GuessStatus.NOT_GUESSED),
-        Word("Wife", CardOwner.TeamOwned(Team.BLUE), GuessStatus.NOT_GUESSED),
-        Word("Love", CardOwner.TeamOwned(Team.BLUE), GuessStatus.NOT_GUESSED),
-        Word("Cake", CardOwner.TeamOwned(Team.BLUE), GuessStatus.NOT_GUESSED),
-        Word("Coffee", CardOwner.TeamOwned(Team.RED), GuessStatus.NOT_GUESSED),
-        Word("Lousiana", CardOwner.TeamOwned(Team.RED), GuessStatus.NOT_GUESSED),
-        Word("France", CardOwner.TeamOwned(Team.RED), GuessStatus.NOT_GUESSED),
-        Word("King Henry", CardOwner.TeamOwned(Team.RED), GuessStatus.NOT_GUESSED),
-        Word("Donald Trump", CardOwner.TeamOwned(Team.RED), GuessStatus.NOT_GUESSED),
-        Word("Disaster", CardOwner.TeamOwned(Team.RED), GuessStatus.NOT_GUESSED),
-        Word("Heavy", CardOwner.TeamOwned(Team.RED), GuessStatus.NOT_GUESSED),
-        Word("Sweet", CardOwner.TeamOwned(Team.RED), GuessStatus.NOT_GUESSED),
-        Word("Travel", CardOwner.TeamOwned(Team.RED), GuessStatus.NOT_GUESSED),
-        Word("Nepal", CardOwner.Unowned, GuessStatus.NOT_GUESSED),
-        Word("Chisso", CardOwner.Unowned, GuessStatus.NOT_GUESSED),
-        Word("Rukh", CardOwner.Unowned, GuessStatus.NOT_GUESSED),
-        Word("Kutta", CardOwner.Unowned, GuessStatus.NOT_GUESSED),
-        Word("Pink", CardOwner.Unowned, GuessStatus.NOT_GUESSED),
-        Word("Revolution", CardOwner.Unowned, GuessStatus.NOT_GUESSED),
-        Word("Surprised", CardOwner.Unowned, GuessStatus.NOT_GUESSED),
-        Word("Pokemon", CardOwner.AssassinOwned, GuessStatus.NOT_GUESSED)
+        Word("Grapefruit", CardOwner.TeamOwned(Team.Blue), GuessStatus.NotGuessed),
+        Word("Banana", CardOwner.TeamOwned(Team.Blue), GuessStatus.NotGuessed),
+        Word("Apple", CardOwner.TeamOwned(Team.Blue), GuessStatus.NotGuessed),
+        Word("Wagon", CardOwner.TeamOwned(Team.Blue), GuessStatus.NotGuessed),
+        Word("Wood", CardOwner.TeamOwned(Team.Blue), GuessStatus.NotGuessed),
+        Word("Wife", CardOwner.TeamOwned(Team.Blue), GuessStatus.NotGuessed),
+        Word("Love", CardOwner.TeamOwned(Team.Blue), GuessStatus.NotGuessed),
+        Word("Cake", CardOwner.TeamOwned(Team.Blue), GuessStatus.NotGuessed),
+        Word("Coffee", CardOwner.TeamOwned(Team.Red), GuessStatus.NotGuessed),
+        Word("Lousiana", CardOwner.TeamOwned(Team.Red), GuessStatus.NotGuessed),
+        Word("France", CardOwner.TeamOwned(Team.Red), GuessStatus.NotGuessed),
+        Word("King Henry", CardOwner.TeamOwned(Team.Red), GuessStatus.NotGuessed),
+        Word("Donald Trump", CardOwner.TeamOwned(Team.Red), GuessStatus.NotGuessed),
+        Word("Disaster", CardOwner.TeamOwned(Team.Red), GuessStatus.NotGuessed),
+        Word("Heavy", CardOwner.TeamOwned(Team.Red), GuessStatus.NotGuessed),
+        Word("Sweet", CardOwner.TeamOwned(Team.Red), GuessStatus.NotGuessed),
+        Word("Travel", CardOwner.TeamOwned(Team.Red), GuessStatus.NotGuessed),
+        Word("Nepal", CardOwner.Unowned, GuessStatus.NotGuessed),
+        Word("Chisso", CardOwner.Unowned, GuessStatus.NotGuessed),
+        Word("Rukh", CardOwner.Unowned, GuessStatus.NotGuessed),
+        Word("Kutta", CardOwner.Unowned, GuessStatus.NotGuessed),
+        Word("Pink", CardOwner.Unowned, GuessStatus.NotGuessed),
+        Word("Revolution", CardOwner.Unowned, GuessStatus.NotGuessed),
+        Word("Surprised", CardOwner.Unowned, GuessStatus.NotGuessed),
+        Word("Pokemon", CardOwner.AssassinOwned, GuessStatus.NotGuessed)
     ).shuffled()
 }

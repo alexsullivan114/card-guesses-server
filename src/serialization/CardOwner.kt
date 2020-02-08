@@ -10,7 +10,7 @@ class CardOwnerSerializer : JsonSerializer<CardOwner>() {
         val serializedString = when (value) {
             is CardOwner.TeamOwned -> value.team.toString()
             CardOwner.Unowned -> "Unowned"
-            CardOwner.AssassinOwned -> "AssassinOwned"
+            CardOwner.AssassinOwned -> "Assassin"
         }
 
         gen.writeString(serializedString)

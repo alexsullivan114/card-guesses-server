@@ -5,7 +5,7 @@ import com.alexsullivan.serialization.GameStatusSerializer
 import com.fasterxml.jackson.annotation.JsonUnwrapped
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 
-data class Game(@JsonUnwrapped val gameCode: GameCode, val words: List<Word>, val status: GameStatus)
+data class Game(val gameCode: GameCode, val words: List<Word>, val status: GameStatus)
 
 data class Word(val text: String, val owner: CardOwner, val guessStatus: GuessStatus)
 
@@ -17,13 +17,13 @@ sealed class CardOwner {
 }
 
 enum class Team {
-    BLUE, RED;
+    Blue, Red;
 
     val otherTeam: Team
-        get() = if (this == BLUE) RED else BLUE
+        get() = if (this == Blue) Red else Blue
 }
 
-enum class GuessStatus { GUESSED, NOT_GUESSED }
+enum class GuessStatus { Guessed, NotGuessed }
 
 @JsonSerialize(using = GameStatusSerializer::class)
 sealed class GameStatus {
