@@ -1,30 +1,51 @@
 package com.alexsullivan.models
 
+import com.alexsullivan.models.network.Clue
 import com.alexsullivan.models.network.Guess
+import com.alexsullivan.models.network.Round
 import com.alexsullivan.replace
 
 fun newGame(gameCode: GameCode): Game {
-    return Game(gameCode, randomWords(), GameStatus.Playing)
+    return Game(gameCode, randomWords(), GameStatus.Playing, Round(Team.Red, null))
+}
+
+fun processClue(oldGameState: Game, clue: Clue): Game {
+    return oldGameState.copy(currentRound = oldGameState.currentRound.copy(clue = clue))
 }
 
 fun processGuess(oldGameState: Game, guess: Guess): Game {
     val word = oldGameState.words.first { it.text == guess.text }
     val updatedWord = word.copy(guessStatus = GuessStatus.Guessed)
     val newWords = oldGameState.words.replace(word, updatedWord)
-    return when (word.owner) {
-        CardOwner.AssassinOwned -> Game(
-            oldGameState.gameCode,
-            newWords,
-            GameStatus.GameOver(winner = guess.team.otherTeam)
-        )
-        else -> {
-            val gameStatus = updatedStatus(newWords)
-            Game(oldGameState.gameCode, newWords, gameStatus)
+    return if (guess.team != oldGameState.currentRound.teamUp || oldGameState.currentRound.clue == null) {
+        oldGameState.copy()
+    } else {
+        when (word.owner) {
+            CardOwner.AssassinOwned -> Game(
+                oldGameState.gameCode,
+                newWords,
+                GameStatus.GameOver(winner = guess.team.otherTeam),
+                Round(guess.team.otherTeam, null)
+            )
+            else -> {
+                val gameStatus = updatedStatus(newWords)
+                val round = updateRound(oldGameState.currentRound)
+                Game(oldGameState.gameCode, newWords, gameStatus, round)
+            }
         }
     }
 }
 
-fun updatedStatus(words: List<Word>): GameStatus {
+private fun updateRound(previousRound: Round): Round {
+    val hint = previousRound.clue ?: return previousRound.copy()
+    return if (hint.guessesLeft <= 1) {
+        previousRound.copy(teamUp = previousRound.teamUp.otherTeam, clue = null)
+    } else {
+        previousRound.copy(clue = hint.copy(guessesLeft = hint.guessesLeft - 1))
+    }
+}
+
+private fun updatedStatus(words: List<Word>): GameStatus {
     val redWon =
         words.all { it.owner is CardOwner.TeamOwned && it.owner.team == Team.Red && it.guessStatus == GuessStatus.Guessed }
     val blueWon =
@@ -37,7 +58,7 @@ fun updatedStatus(words: List<Word>): GameStatus {
     }
 }
 
-fun randomWords(): List<Word> {
+private fun randomWords(): List<Word> {
     return listOf(
         Word("Grapefruit", CardOwner.TeamOwned(Team.Blue), GuessStatus.NotGuessed),
         Word("Banana", CardOwner.TeamOwned(Team.Blue), GuessStatus.NotGuessed),

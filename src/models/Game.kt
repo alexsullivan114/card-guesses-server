@@ -1,11 +1,11 @@
 package com.alexsullivan.models
 
+import com.alexsullivan.models.network.Round
 import com.alexsullivan.serialization.CardOwnerSerializer
 import com.alexsullivan.serialization.GameStatusSerializer
-import com.fasterxml.jackson.annotation.JsonUnwrapped
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 
-data class Game(val gameCode: GameCode, val words: List<Word>, val status: GameStatus)
+data class Game(val gameCode: GameCode, val words: List<Word>, val status: GameStatus, val currentRound: Round)
 
 data class Word(val text: String, val owner: CardOwner, val guessStatus: GuessStatus)
 

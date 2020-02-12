@@ -1,10 +1,8 @@
 package com.alexsullivan
 
-import com.alexsullivan.models.Game
-import com.alexsullivan.models.GameCode
+import com.alexsullivan.models.*
 import com.alexsullivan.models.network.Guess
-import com.alexsullivan.models.newGame
-import com.alexsullivan.models.processGuess
+import com.alexsullivan.models.network.Clue
 import com.fasterxml.jackson.databind.SerializationFeature
 import io.ktor.application.*
 import io.ktor.features.CallLogging
@@ -26,6 +24,7 @@ import kotlin.streams.asSequence
 fun main() {
     val port = System.getenv("PORT")?.toInt() ?: 8080
     val gameMap = mutableMapOf<GameCode, Game>()
+    val hintMap = mutableMapOf<GameCode, Clue>()
     embeddedServer(Netty, port) {
         install(ContentNegotiation) {
             jackson {
@@ -74,6 +73,31 @@ fun main() {
                         call.respond(updatedGame)
                     } else {
                         call.respond(HttpStatusCode.NotFound)
+                    }
+                }
+                route("/{code}/clue") {
+                    post {
+                        val clue = call.receive<Clue>()
+                        val code = call.parameters.getOrFail("code")
+                        val gameCode = GameCode(code)
+                        val game = gameMap[gameCode]
+                        if (game != null) {
+                            val updatedGame = processClue(game, clue)
+                            gameMap[gameCode] = updatedGame
+                            call.respond(updatedGame)
+                        } else {
+                            call.respond(HttpStatusCode.NotFound)
+                        }
+                    }
+                    get {
+                        val code = call.parameters.getOrFail("code")
+                        val gameCode = GameCode(code)
+                        val game = gameMap[gameCode]
+                        if (game != null && game.currentRound.clue != null) {
+                            call.respond(game.currentRound.clue)
+                        } else {
+                            call.respond(HttpStatusCode.NotFound)
+                        }
                     }
                 }
             }
