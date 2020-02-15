@@ -3,6 +3,7 @@ package com.alexsullivan
 import com.alexsullivan.models.*
 import com.alexsullivan.models.network.Guess
 import com.alexsullivan.models.network.Clue
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import io.ktor.application.*
 import io.ktor.features.CallLogging
@@ -10,12 +11,16 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.features.ContentNegotiation
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.cio.websocket.DefaultWebSocketSession
+import io.ktor.http.cio.websocket.Frame
 import io.ktor.jackson.jackson
 import io.ktor.request.receive
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.util.KtorExperimentalAPI
 import io.ktor.util.getOrFail
+import io.ktor.websocket.WebSockets
+import io.ktor.websocket.webSocket
 import org.slf4j.event.Level
 import java.util.*
 import kotlin.streams.asSequence
@@ -24,8 +29,16 @@ import kotlin.streams.asSequence
 fun main() {
     val port = System.getenv("PORT")?.toInt() ?: 8080
     val gameMap = mutableMapOf<GameCode, Game>()
-    val hintMap = mutableMapOf<GameCode, Clue>()
+    val wsConnections = Collections.synchronizedSet(LinkedHashSet<Pair<GameCode, DefaultWebSocketSession>>())
+    fun setUpdatedGame(code: GameCode, game: Game) {
+        gameMap[code] = game
+        val objectMapper = ObjectMapper()
+        wsConnections.filter { it.first == code }
+            .map { it.second }
+            .forEach { it.outgoing.offer(Frame.Text(objectMapper.writeValueAsString(game))) }
+    }
     embeddedServer(Netty, port) {
+        install(WebSockets)
         install(ContentNegotiation) {
             jackson {
                 enable(SerializationFeature.INDENT_OUTPUT)
@@ -48,18 +61,33 @@ fun main() {
                         .joinToString("")
 
                     val gameCode = GameCode(code)
-                    gameMap[gameCode] = newGame(gameCode)
+                    val game = newGame(gameCode)
+                    setUpdatedGame(gameCode, game)
 
                     call.respond(gameCode)
                 }
-                get("{code}") {
-                    val code = call.parameters.getOrFail("code")
-                    val gameCode = GameCode(code)
-                    val game = gameMap[gameCode]
-                    if (game != null) {
-                        call.respond(game)
-                    } else {
-                        call.respond(HttpStatusCode.NotFound)
+                route("/{code}") {
+                    get {
+                        val code = call.parameters.getOrFail("code")
+                        val gameCode = GameCode(code)
+                        val game = gameMap[gameCode]
+                        if (game != null) {
+                            call.respond(game)
+                        } else {
+                            call.respond(HttpStatusCode.NotFound)
+                        }
+                    }
+                    webSocket("/socket") {
+                        val code = call.parameters.getOrFail("code")
+                        val gameCode = GameCode(code)
+                        val connectionPair = Pair(gameCode, this)
+                        wsConnections += connectionPair
+                        try {
+                            while (true) {
+                            }
+                        } finally {
+                            wsConnections -= connectionPair
+                        }
                     }
                 }
                 post("/{code}/guess") {
@@ -69,7 +97,7 @@ fun main() {
                     val game = gameMap[gameCode]
                     if (game != null) {
                         val updatedGame = processGuess(game, guess)
-                        gameMap[gameCode] = updatedGame
+                        setUpdatedGame(gameCode, updatedGame)
                         call.respond(updatedGame)
                     } else {
                         call.respond(HttpStatusCode.NotFound)
@@ -83,7 +111,7 @@ fun main() {
                         val game = gameMap[gameCode]
                         if (game != null) {
                             val updatedGame = processClue(game, clue)
-                            gameMap[gameCode] = updatedGame
+                            setUpdatedGame(gameCode, updatedGame)
                             call.respond(updatedGame)
                         } else {
                             call.respond(HttpStatusCode.NotFound)
