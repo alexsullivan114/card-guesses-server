@@ -95,7 +95,7 @@ fun main() {
                     val code = call.parameters.getOrFail("code")
                     val gameCode = GameCode(code)
                     val game = gameMap[gameCode]
-                    if (game != null) {
+                    if (game != null && game.status == GameStatus.Playing) {
                         val updatedGame = processGuess(game, guess)
                         setUpdatedGame(gameCode, updatedGame)
                         call.respond(updatedGame)

@@ -47,9 +47,11 @@ private fun updateRound(previousRound: Round): Round {
 
 private fun updatedStatus(words: List<Word>): GameStatus {
     val redWon =
-        words.all { it.owner is CardOwner.TeamOwned && it.owner.team == Team.Red && it.guessStatus == GuessStatus.Guessed }
+        words.filter { it.owner is CardOwner.TeamOwned && it.owner.team == Team.Red }
+            .all { it.guessStatus == GuessStatus.Guessed }
     val blueWon =
-        words.all { it.owner is CardOwner.TeamOwned && it.owner.team == Team.Blue && it.guessStatus == GuessStatus.Guessed }
+        words.filter { it.owner is CardOwner.TeamOwned && it.owner.team == Team.Blue }
+            .all { it.guessStatus == GuessStatus.Guessed }
 
     return when {
         redWon -> GameStatus.GameOver(winner = Team.Red)
