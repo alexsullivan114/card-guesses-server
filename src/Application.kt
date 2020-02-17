@@ -82,11 +82,11 @@ fun main() {
                         val gameCode = GameCode(code)
                         val connectionPair = Pair(gameCode, this)
                         wsConnections += connectionPair
-                        try {
-                            while (true) {
-                            }
-                        } finally {
-                            wsConnections -= connectionPair
+                        val game = gameMap[gameCode]
+                        val objectMapper = ObjectMapper()
+                        game?.let { outgoing.offer(Frame.Text(objectMapper.writeValueAsString(it))) }
+                        for (frame in incoming) {
+                            print("Frame: $frame")
                         }
                     }
                 }
