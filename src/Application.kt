@@ -52,81 +52,75 @@ fun main() {
             get("") {
                 call.respond("OK")
             }
-            route("/game") {
-                post {
-                    val source = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                    val code = Random().ints(4, 0, source.length)
-                        .asSequence()
-                        .map(source::get)
-                        .joinToString("")
+            post("/game") {
+                val source = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                val code = Random().ints(4, 0, source.length)
+                    .asSequence()
+                    .map(source::get)
+                    .joinToString("")
 
-                    val gameCode = GameCode(code)
-                    val game = newGame(gameCode)
-                    setUpdatedGame(gameCode, game)
+                val gameCode = GameCode(code)
+                val game = newGame(gameCode)
+                setUpdatedGame(gameCode, game)
 
-                    call.respond(gameCode)
+                call.respond(gameCode)
+            }
+            get("/game/{code}") {
+                val code = call.parameters.getOrFail("code")
+                val gameCode = GameCode(code)
+                val game = gameMap[gameCode]
+                if (game != null) {
+                    call.respond(game)
+                } else {
+                    call.respond(HttpStatusCode.NotFound)
                 }
-                route("/{code}") {
-                    get {
-                        val code = call.parameters.getOrFail("code")
-                        val gameCode = GameCode(code)
-                        val game = gameMap[gameCode]
-                        if (game != null) {
-                            call.respond(game)
-                        } else {
-                            call.respond(HttpStatusCode.NotFound)
-                        }
-                    }
-                    webSocket("/socket") {
-                        val code = call.parameters.getOrFail("code")
-                        val gameCode = GameCode(code)
-                        val connectionPair = Pair(gameCode, this)
-                        wsConnections += connectionPair
-                        val game = gameMap[gameCode]
-                        val objectMapper = ObjectMapper()
-                        game?.let { outgoing.offer(Frame.Text(objectMapper.writeValueAsString(it))) }
-                        for (frame in incoming) {
-                            print("Frame: $frame")
-                        }
-                    }
+            }
+            webSocket("/game/{code}/socket") {
+                val code = call.parameters.getOrFail("code")
+                val gameCode = GameCode(code)
+                val connectionPair = Pair(gameCode, this)
+                wsConnections += connectionPair
+                val game = gameMap[gameCode]
+                val objectMapper = ObjectMapper()
+                game?.let { outgoing.offer(Frame.Text(objectMapper.writeValueAsString(it))) }
+                for (frame in incoming) {
+                    print("Frame: $frame")
                 }
-                post("/{code}/guess") {
-                    val guess = call.receive<Guess>()
-                    val code = call.parameters.getOrFail("code")
-                    val gameCode = GameCode(code)
-                    val game = gameMap[gameCode]
-                    if (game != null && game.status == GameStatus.Playing) {
-                        val updatedGame = processGuess(game, guess)
-                        setUpdatedGame(gameCode, updatedGame)
-                        call.respond(updatedGame)
-                    } else {
-                        call.respond(HttpStatusCode.NotFound)
-                    }
+            }
+            post("/game/{code}/guess") {
+                val guess = call.receive<Guess>()
+                val code = call.parameters.getOrFail("code")
+                val gameCode = GameCode(code)
+                val game = gameMap[gameCode]
+                if (game != null && game.status == GameStatus.Playing) {
+                    val updatedGame = processGuess(game, guess)
+                    setUpdatedGame(gameCode, updatedGame)
+                    call.respond(updatedGame)
+                } else {
+                    call.respond(HttpStatusCode.NotFound)
                 }
-                route("/{code}/clue") {
-                    post {
-                        val clue = call.receive<Clue>()
-                        val code = call.parameters.getOrFail("code")
-                        val gameCode = GameCode(code)
-                        val game = gameMap[gameCode]
-                        if (game != null) {
-                            val updatedGame = processClue(game, clue)
-                            setUpdatedGame(gameCode, updatedGame)
-                            call.respond(updatedGame)
-                        } else {
-                            call.respond(HttpStatusCode.NotFound)
-                        }
-                    }
-                    get {
-                        val code = call.parameters.getOrFail("code")
-                        val gameCode = GameCode(code)
-                        val game = gameMap[gameCode]
-                        if (game != null && game.currentRound.clue != null) {
-                            call.respond(game.currentRound.clue)
-                        } else {
-                            call.respond(HttpStatusCode.NotFound)
-                        }
-                    }
+            }
+            post("/game/{code}/clue") {
+                val clue = call.receive<Clue>()
+                val code = call.parameters.getOrFail("code")
+                val gameCode = GameCode(code)
+                val game = gameMap[gameCode]
+                if (game != null) {
+                    val updatedGame = processClue(game, clue)
+                    setUpdatedGame(gameCode, updatedGame)
+                    call.respond(updatedGame)
+                } else {
+                    call.respond(HttpStatusCode.NotFound)
+                }
+            }
+            get("/game/{code}/clue") {
+                val code = call.parameters.getOrFail("code")
+                val gameCode = GameCode(code)
+                val game = gameMap[gameCode]
+                if (game != null && game.currentRound.clue != null) {
+                    call.respond(game.currentRound.clue)
+                } else {
+                    call.respond(HttpStatusCode.NotFound)
                 }
             }
         }
