@@ -5,7 +5,14 @@ import com.alexsullivan.serialization.CardOwnerSerializer
 import com.alexsullivan.serialization.GameStatusSerializer
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 
-data class Game(val gameCode: GameCode, val words: List<Word>, val status: GameStatus, val currentRound: Round)
+data class Game(
+    val gameCode: GameCode,
+    val words: List<Word>,
+    val status: GameStatus,
+    val currentRound: Round,
+    val redMasterSelected: Boolean,
+    val blueMasterSelected: Boolean
+)
 
 data class Word(val text: String, val owner: CardOwner, val guessStatus: GuessStatus)
 

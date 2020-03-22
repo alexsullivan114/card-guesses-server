@@ -6,7 +6,10 @@ import com.alexsullivan.models.network.Round
 import com.alexsullivan.replace
 
 fun newGame(gameCode: GameCode): Game {
-    return Game(gameCode, randomWords(), GameStatus.Playing, Round(Team.Red, null))
+    return Game(
+        gameCode, randomWords(), GameStatus.Playing, Round(Team.Red, null),
+        redMasterSelected = false, blueMasterSelected = false
+    )
 }
 
 fun processClue(oldGameState: Game, clue: Clue): Game {
@@ -25,12 +28,21 @@ fun processGuess(oldGameState: Game, guess: Guess): Game {
                 oldGameState.gameCode,
                 newWords,
                 GameStatus.GameOver(winner = guess.team.otherTeam),
-                Round(guess.team.otherTeam, null)
+                Round(guess.team.otherTeam, null),
+                oldGameState.redMasterSelected,
+                oldGameState.blueMasterSelected
             )
             else -> {
                 val gameStatus = updatedStatus(newWords)
                 val round = updateRound(oldGameState.currentRound)
-                Game(oldGameState.gameCode, newWords, gameStatus, round)
+                Game(
+                    oldGameState.gameCode,
+                    newWords,
+                    gameStatus,
+                    round,
+                    oldGameState.redMasterSelected,
+                    oldGameState.blueMasterSelected
+                )
             }
         }
     }
@@ -61,31 +73,13 @@ private fun updatedStatus(words: List<Word>): GameStatus {
 }
 
 private fun randomWords(): List<Word> {
-    return listOf(
-        Word("Grapefruit", CardOwner.TeamOwned(Team.Blue), GuessStatus.NotGuessed),
-        Word("Banana", CardOwner.TeamOwned(Team.Blue), GuessStatus.NotGuessed),
-        Word("Apple", CardOwner.TeamOwned(Team.Blue), GuessStatus.NotGuessed),
-        Word("Wagon", CardOwner.TeamOwned(Team.Blue), GuessStatus.NotGuessed),
-        Word("Wood", CardOwner.TeamOwned(Team.Blue), GuessStatus.NotGuessed),
-        Word("Wife", CardOwner.TeamOwned(Team.Blue), GuessStatus.NotGuessed),
-        Word("Love", CardOwner.TeamOwned(Team.Blue), GuessStatus.NotGuessed),
-        Word("Cake", CardOwner.TeamOwned(Team.Blue), GuessStatus.NotGuessed),
-        Word("Coffee", CardOwner.TeamOwned(Team.Red), GuessStatus.NotGuessed),
-        Word("Lousiana", CardOwner.TeamOwned(Team.Red), GuessStatus.NotGuessed),
-        Word("France", CardOwner.TeamOwned(Team.Red), GuessStatus.NotGuessed),
-        Word("King Henry", CardOwner.TeamOwned(Team.Red), GuessStatus.NotGuessed),
-        Word("Donald Trump", CardOwner.TeamOwned(Team.Red), GuessStatus.NotGuessed),
-        Word("Disaster", CardOwner.TeamOwned(Team.Red), GuessStatus.NotGuessed),
-        Word("Heavy", CardOwner.TeamOwned(Team.Red), GuessStatus.NotGuessed),
-        Word("Sweet", CardOwner.TeamOwned(Team.Red), GuessStatus.NotGuessed),
-        Word("Travel", CardOwner.TeamOwned(Team.Red), GuessStatus.NotGuessed),
-        Word("Nepal", CardOwner.Unowned, GuessStatus.NotGuessed),
-        Word("Chisso", CardOwner.Unowned, GuessStatus.NotGuessed),
-        Word("Rukh", CardOwner.Unowned, GuessStatus.NotGuessed),
-        Word("Kutta", CardOwner.Unowned, GuessStatus.NotGuessed),
-        Word("Pink", CardOwner.Unowned, GuessStatus.NotGuessed),
-        Word("Revolution", CardOwner.Unowned, GuessStatus.NotGuessed),
-        Word("Surprised", CardOwner.Unowned, GuessStatus.NotGuessed),
-        Word("Pokemon", CardOwner.AssassinOwned, GuessStatus.NotGuessed)
-    ).shuffled()
+    val shuffledWords = words.shuffled().subList(0, 25)
+    val redWords = shuffledWords.subList(0, 9)
+        .map { Word(it, CardOwner.TeamOwned(Team.Red), GuessStatus.NotGuessed) }
+    val blueWords = shuffledWords.subList(9, 17)
+        .map { Word(it, CardOwner.TeamOwned(Team.Blue), GuessStatus.NotGuessed) }
+    val unownedWords = shuffledWords.subList(17, 25)
+        .map { Word(it, CardOwner.Unowned, GuessStatus.NotGuessed) }
+
+    return redWords + blueWords + unownedWords
 }

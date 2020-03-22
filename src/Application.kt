@@ -123,6 +123,11 @@ fun main() {
                     call.respond(HttpStatusCode.NotFound)
                 }
             }
+            post("/game/{code}/master") {
+                val code = call.parameters.getOrFail("code")
+                val gameCode = GameCode(code)
+                val game = gameMap[gameCode]
+            }
         }
     }.start(wait = true)
 }
