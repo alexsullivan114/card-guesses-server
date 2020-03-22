@@ -78,8 +78,9 @@ private fun randomWords(): List<Word> {
         .map { Word(it, CardOwner.TeamOwned(Team.Red), GuessStatus.NotGuessed) }
     val blueWords = shuffledWords.subList(9, 17)
         .map { Word(it, CardOwner.TeamOwned(Team.Blue), GuessStatus.NotGuessed) }
-    val unownedWords = shuffledWords.subList(17, 25)
+    val unownedWords = shuffledWords.subList(17, 24)
         .map { Word(it, CardOwner.Unowned, GuessStatus.NotGuessed) }
+    val assasinWord = Word(shuffledWords.get(24), CardOwner.AssassinOwned, GuessStatus.NotGuessed)
 
-    return (redWords + blueWords + unownedWords).shuffled()
+    return (redWords + blueWords + unownedWords + assasinWord).shuffled()
 }
