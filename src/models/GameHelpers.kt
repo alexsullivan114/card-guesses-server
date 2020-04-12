@@ -21,6 +21,7 @@ fun processGuess(oldGameState: Game, guess: Guess): Game {
     val updatedWord = word.copy(guessStatus = GuessStatus.Guessed)
     val newWords = oldGameState.words.replace(word, updatedWord)
     return if (guess.team != oldGameState.currentRound.teamUp || oldGameState.currentRound.clue == null) {
+        // If it's not your turn to guess then do nothing
         oldGameState.copy()
     } else {
         when (word.owner) {
@@ -34,7 +35,7 @@ fun processGuess(oldGameState: Game, guess: Guess): Game {
             )
             else -> {
                 val gameStatus = updatedStatus(newWords)
-                val round = updateRound(oldGameState.currentRound)
+                val round = updateRound(oldGameState.currentRound, word)
                 Game(
                     oldGameState.gameCode,
                     newWords,
@@ -48,9 +49,13 @@ fun processGuess(oldGameState: Game, guess: Guess): Game {
     }
 }
 
-private fun updateRound(previousRound: Round): Round {
+private fun updateRound(previousRound: Round, guessedWord: Word): Round {
     val hint = previousRound.clue ?: return previousRound.copy()
-    return if (hint.guessesLeft <= 1) {
+    val guessedOtherTeamsWord = when (guessedWord.owner) {
+        is CardOwner.TeamOwned -> previousRound.teamUp != guessedWord.owner.team
+        else -> false
+    }
+    return if (hint.guessesLeft <= 1 || guessedOtherTeamsWord) {
         previousRound.copy(teamUp = previousRound.teamUp.otherTeam, clue = null)
     } else {
         previousRound.copy(clue = hint.copy(guessesLeft = hint.guessesLeft - 1))
