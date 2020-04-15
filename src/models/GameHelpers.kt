@@ -20,7 +20,7 @@ fun processGuess(oldGameState: Game, guess: Guess): Game {
     val word = oldGameState.words.first { it.text == guess.text }
     val updatedWord = word.copy(guessStatus = GuessStatus.Guessed)
     val newWords = oldGameState.words.replace(word, updatedWord)
-    return if (guess.team != oldGameState.currentRound.teamUp || oldGameState.currentRound.clue == null) {
+    return if (guess.team != oldGameState.currentRound.teamUp || oldGameState.currentRound.clue == null || word.guessStatus == GuessStatus.Guessed) {
         // If it's not your turn to guess then do nothing
         oldGameState.copy()
     } else {
