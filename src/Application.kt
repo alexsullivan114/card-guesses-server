@@ -53,7 +53,6 @@ fun main() {
                 call.respond("OK")
             }
             post("/game") {
-                println("Woooofers")
                 val source = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                 val code = Random().ints(4, 0, source.length)
                     .asSequence()
@@ -73,6 +72,7 @@ fun main() {
                 if (game != null) {
                     call.respond(game)
                 } else {
+                    println("Couldn't find code in map $gameMap")
                     call.respond(HttpStatusCode.NotFound)
                 }
             }
@@ -98,6 +98,7 @@ fun main() {
                     setUpdatedGame(gameCode, updatedGame)
                     call.respond(updatedGame)
                 } else {
+                    println("Couldn't find code in map $gameMap")
                     call.respond(HttpStatusCode.NotFound)
                 }
             }
@@ -111,6 +112,7 @@ fun main() {
                     setUpdatedGame(gameCode, updatedGame)
                     call.respond(updatedGame)
                 } else {
+                    println("Couldn't find code in map $gameMap")
                     call.respond(HttpStatusCode.NotFound)
                 }
             }
@@ -121,6 +123,7 @@ fun main() {
                 if (game != null && game.currentRound.clue != null) {
                     call.respond(game.currentRound.clue)
                 } else {
+                    println("Couldn't find code in map $gameMap")
                     call.respond(HttpStatusCode.NotFound)
                 }
             }
