@@ -53,7 +53,7 @@ fun main() {
                 call.respond("OK")
             }
             post("/game") {
-                throw RuntimeException("Testing")
+                println("Woooofers")
                 val source = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                 val code = Random().ints(4, 0, source.length)
                     .asSequence()
