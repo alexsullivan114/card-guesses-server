@@ -35,7 +35,13 @@ fun main() {
         val objectMapper = ObjectMapper()
         wsConnections.filter { it.first == code }
             .map { it.second }
-            .forEach { it.outgoing.offer(Frame.Text(objectMapper.writeValueAsString(game))) }
+            .forEach {
+                try {
+                    it.outgoing.offer(Frame.Text(objectMapper.writeValueAsString(game)))
+                } catch (e: Exception) {
+                    println("Tried to push a frame to the socket and failed")
+                }
+            }
     }
     embeddedServer(Netty, port) {
         install(WebSockets)
