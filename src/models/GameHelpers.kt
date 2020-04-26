@@ -51,11 +51,11 @@ fun processGuess(oldGameState: Game, guess: Guess): Game {
 
 private fun updateRound(previousRound: Round, guessedWord: Word): Round {
     val hint = previousRound.clue ?: return previousRound.copy()
-    val guessedOtherTeamsWord = when (guessedWord.owner) {
+    val incorrectGuess = when (guessedWord.owner) {
         is CardOwner.TeamOwned -> previousRound.teamUp != guessedWord.owner.team
-        else -> false
+        else -> true
     }
-    return if (hint.guessesLeft <= 1 || guessedOtherTeamsWord) {
+    return if (hint.guessesLeft <= 1 || incorrectGuess) {
         previousRound.copy(teamUp = previousRound.teamUp.otherTeam, clue = null)
     } else {
         previousRound.copy(clue = hint.copy(guessesLeft = hint.guessesLeft - 1))
