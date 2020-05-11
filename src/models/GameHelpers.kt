@@ -16,6 +16,10 @@ fun processClue(oldGameState: Game, clue: Clue): Game {
     return oldGameState.copy(currentRound = oldGameState.currentRound.copy(clue = clue))
 }
 
+fun processPass(oldGameState: Game): Game {
+    return oldGameState.copy(currentRound = Round(oldGameState.currentRound.teamUp.otherTeam, null))
+}
+
 fun processGuess(oldGameState: Game, guess: Guess): Game {
     val word = oldGameState.words.first { it.text == guess.text }
     val updatedWord = word.copy(guessStatus = GuessStatus.Guessed)

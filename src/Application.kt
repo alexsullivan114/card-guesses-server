@@ -133,6 +133,19 @@ fun main() {
                     call.respond(HttpStatusCode.NotFound)
                 }
             }
+            post("/game/{code}/pass") {
+                val code = call.parameters.getOrFail("code")
+                val gameCode = GameCode(code)
+                val game = gameMap[gameCode]
+                if (game != null && game.currentRound.clue != null) {
+                    val updatedGame = processPass(game)
+                    setUpdatedGame(gameCode, updatedGame)
+                    call.respond(updatedGame)
+                } else {
+                    println("Couldn't find code in map $gameMap")
+                    call.respond(HttpStatusCode.NotFound)
+                }
+            }
             post("/game/{code}/master") {
                 val code = call.parameters.getOrFail("code")
                 val gameCode = GameCode(code)
